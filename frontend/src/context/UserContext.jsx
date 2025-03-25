@@ -1,11 +1,29 @@
-import React, { useState,createContext,useEffect } from 'react'
-import axios from 'axios'
+import React, { useState, createContext, useEffect } from "react";
+import axios from "axios";
 
+// Create UserContext
+export const UserContext = createContext({});
 
-function UserContext() {
+export default function UserContextProvider({ children }) {
+  const [user, setUser] = useState(null);
+
+  // Fetch user data on mount
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const res = await axios.get("auth/api/refetch", { withCredentials: true });
+        setUser(res.data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    getUser();
+  }, []);
+
   return (
-    <div>UserContext</div>
-  )
+    <UserContext.Provider value={{ user, setUser }}>
+      {children} {/* Corrected from 'Children' */}
+    </UserContext.Provider>
+  );
 }
-
-export default UserContext

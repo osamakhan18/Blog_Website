@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useLocation,  useNavigate,  useNavigation } from 'react-router-dom'
 import Menu from './Menu';
 import { IoSearchOutline } from "react-icons/io5"
 import { CiMenuBurger } from "react-icons/ci";
+import { UserContext } from '../context/UserContext';
 function Navbar() {
   const [prompt,setprompt] = useState("")
   const [menu,setMenu] = useState(false)
@@ -13,6 +14,7 @@ function Navbar() {
     setMenu(!menu)
   }
 
+  const {user} = useContext(UserContext)
   
 
   return (
