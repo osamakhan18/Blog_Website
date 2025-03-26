@@ -16,8 +16,12 @@ router.post('/register',async (req,res)=>{
       username,email,password:hashPassword
     })
 
+
     const saveUser = await  newUser.save()
     res.status(200).json("user saved successfully")
+    res.status(200).json("user register for the blog successfully")
+
+
 
   }catch{
     res.status(500).json("error occur ")
@@ -43,6 +47,7 @@ router.post('/login',async (req,res)=>{
     const token = jwt.sign({_id,username:user.username,email:user.email},
       process.env.KEY)
       const { password, ...info } = user.doc;
+
 res.cookie("token",token,{
   httpOnly:true,
   secure:true,
@@ -50,6 +55,18 @@ res.cookie("token",token,{
 }).status(200).json(info)
 
 
+router.get('logout',async ()=>{
+  try{
+    res.clearCookie("token",{
+      sameSite:"none",
+      secure:true
+    }).status(200).json("logout successfully ")
+
+  }catch{
+    res.status(401).json("cannot logout plz try later")
+
+  }
+})
   
 
    }catch{
@@ -57,3 +74,28 @@ res.cookie("token",token,{
 
    }
 })
+
+
+// refetch the user data
+
+router.get('/refetch',async ()=>{
+  try{
+    const token = req.cookies.token
+     jwt.verify(_id,process.env.KEY,{},async (err,data)=>{
+      if(!token){
+       return  res.status(401).json("cannot verify")
+
+      }else{
+        res.status(200).json(data)
+      }
+    })
+
+
+  }catch{
+    res.status(404).json("cannot found ")
+
+  }
+  next()
+})
+
+module.exports= router
