@@ -2,8 +2,8 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const router = express.Router()
 const User = require('../models/User')
-const Comment = require('../models/comment')
-const Post = require('../models/post');
+const Comment = require('./comment')
+const Post = require('./Post');
 const bcrypt = require('bcrypt')
 
 const verifyToken = require('/VerifyToken')
