@@ -6,96 +6,77 @@ const router = express.Router()
 const User = require('../models/User')
 
  // register User
-router.post('/register',async (req,res)=>{
-  try{
-    const { username,email,password,} = req.body
+router.post('/register', async (req, res) => {
+  try {
+    const { username, email, password } = req.body
 
-    const  salt= await bcrypt.genSalt(10)
-    const hashPassword = await bcrypt.hash(password,salt)
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(password, salt)
     const newUser = new User({
-      username,email,password:hashPassword
+      username, email, password: hashPassword
     })
 
+    const saveUser = await newUser.save()
+    res.status(200).json(saveUser) // Removed duplicate response
 
-    const saveUser = await  newUser.save()
-    res.status(200).json("user saved successfully")
-    res.status(200).json("user register for the blog successfully")
-
-
-
-  }catch{
-    res.status(500).json("error occur ")
-    
+  } catch (error) {
+    res.status(500).json("error occurred: " + error.message)
   }
-
 })
 
 // Login
-
-router.post('/login',async (req,res)=>{
-   try{
-    // const {email,password} = req.body
-    const user =await User.findOne({email:req.body.email})
-    if(!user){
-      res.status(401).json("user  cannot found ")
+router.post('/login', async (req, res) => {
+   try {
+    const user = await User.findOne({email: req.body.email})
+    if (!user) {
+      return res.status(401).json("user cannot be found")
     }
-    const match = await bcrypt.compare(req.body.password,user.password)
-    if(!match){
-      res.status(401).json("incorrect password")
+    const match = await bcrypt.compare(req.body.password, user.password)
+    if (!match) {
+      return res.status(401).json("incorrect password")
     }
 
-    const token = jwt.sign({_id,username:user.username,email:user.email},
-      process.env.KEY)
-      const { password, ...info } = user.doc;
+    const token = jwt.sign(
+      {_id: user._id, username: user.username, email: user.email}, 
+      process.env.KEY
+    )
+    const { password, ...info } = user.toObject(); // Corrected destructuring
 
-res.cookie("token",token,{
-  httpOnly:true,
-  secure:true,
-  sameSite:'none'
-}).status(200).json(info)
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none'
+    }).status(200).json(info)
 
-
-router.get('logout',async ()=>{
-  try{
-    res.clearCookie("token",{
-      sameSite:"none",
-      secure:true
-    }).status(200).json("logout successfully ")
-
-  }catch{
-    res.status(401).json("cannot logout plz try later")
-
-  }
-})
-  
-
-   }catch{
-    res.status(401)
-
-   }
-})
-
-
-// refetch the user data
-
-router.get('/refetch',async ()=>{
-  try{
-    const token = req.cookies.token
-     jwt.verify(_id,process.env.KEY,{},async (err,data)=>{
-      if(!token){
-       return  res.status(401).json("cannot verify")
-
-      }else{
-        res.status(200).json(data)
+    // Logout route (corrected)
+    router.get('/logout', async (req, res) => {
+      try {
+        res.clearCookie("token", {
+          sameSite: "none",
+          secure: true
+        }).status(200).json("logout successfully")
+      } catch (error) {
+        res.status(401).json("cannot logout, please try later")
       }
     })
-
-
-  }catch{
-    res.status(404).json("cannot found ")
-
+  } catch (error) {
+    res.status(401).json("login error: " + error.message)
   }
-  next()
 })
 
-module.exports= router
+// refetch the user data
+router.get('/refetch', async (req, res) => {
+  try {
+    const token = req.cookies.token
+    jwt.verify(token, process.env.KEY, async (err, data) => {
+      if (err) {
+        return res.status(401).json("cannot verify")
+      }
+      res.status(200).json(data)
+    })
+  } catch (error) {
+    res.status(404).json("cannot found: " + error.message)
+  }
+})
+
+module.exports = router
