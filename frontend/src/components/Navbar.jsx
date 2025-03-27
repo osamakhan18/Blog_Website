@@ -36,7 +36,7 @@ function Navbar() {
        }
        <div className='flex items-center gap-4'>
          { user 
-           ? <Link className='text-lg font-medium text-gray-700 hover:text-blue-600 transition duration-200' to={"/write"}>Write</Link>
+  ? <Link className='text-lg font-medium text-gray-700 hover:text-blue-600 transition duration-200' to={"/write"}>Write</Link>
            : <Link className='text-lg font-medium text-gray-700 hover:text-blue-600 transition duration-200' to={"/login"}>Login</Link>
          }
          { user 
