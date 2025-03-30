@@ -5,28 +5,28 @@ import axios from "axios";
 export const UserContext = createContext({});
 
 export default function UserContextProvider({ children }) {
-   const [user, setUser] = useState(null);
+const [user, setUser] = useState(null);
 
    // Fetch user data on mount
-   useEffect(() => {
+useEffect(() => {
     const getUser = async () => {
       try {
         const res = await axios.get("/auth/api/refetch", { 
-           withCredentials: true 
+        withCredentials: true 
         });
-         setUser(res.data);
+        setUser(res.data);
       } catch (error) {
-       console.error("Error fetching user:", error);
+      console.error("Error fetching user:", error);
         setUser(null);
-       }
-     };
+    }
+    };
 
-     getUser();
-   }, []);
+    getUser();
+  }, []);
 
-   return (
-     <UserContext.Provider value={{ user, setUser }}>
-       {children}
-     </UserContext.Provider>
-   );
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
 }
